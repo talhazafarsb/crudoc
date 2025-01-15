@@ -1,0 +1,48 @@
+version: '3.8'
+
+services:
+  crud-app:
+    build:
+      context: .
+      dockerfile: Dockerfile-app
+    image: crud-app
+    container_name: crud-app
+    networks:
+      - crud-network
+
+  crud-nginx:
+    build:
+      context: .
+      dockerfile: Dockerfile-nginx
+    image: crud-nginx
+    container_name: crud-nginx
+    depends_on:
+      - crud-app
+      - crud-db
+    volumes:
+      - .:/var/www/crud
+    ports:
+      - "8081:8081"
+    networks:
+      - crud-network
+
+  crud-db:
+    build:
+      context: .
+      dockerfile: Dockerfile-db
+    image: crud-db
+    container_name: crud-db
+    environment:
+      MYSQL_ROOT_PASSWORD: '!@bugdeaL3r'
+      MYSQL_DATABASE: db_crud
+    volumes:
+      - crud-db-data:/var/lib/mysql
+    networks:
+      - crud-network
+
+networks:
+  crud-network:
+    driver: bridge
+
+volumes:
+  crud-db-data:
