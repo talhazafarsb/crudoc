@@ -1,0 +1,57 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: crud-nginx
+  labels:
+    app: crud-nginx
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: crud-nginx
+  template:
+    metadata:
+      labels:
+        app: crud-nginx
+    spec:
+      securityContext:
+        runAsNonRoot: true
+      containers:
+        - name: crud-nginx
+          image: docker.io/talhazafarsb1/crud-nginx:latest
+          ports:
+            - containerPort: 8081
+          volumeMounts:
+            - mountPath: /var/www/crud
+              name: crud-app-code
+            - mountPath: /var/cache/nginx
+              name: nginx-cache
+      volumes:
+        - name: nginx-cache
+          emptyDir: {}
+        - name: crud-app-code
+          emptyDir: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: crud-nginx
+spec:
+  ports:
+    - port: 8081
+      targetPort: 8081
+  selector:
+    app: crud-nginx
+---
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  name: crud-nginx-route
+spec:
+  to:
+    kind: Service
+    name: crud-nginx
+  port:
+    targetPort: 8081
+  tls:                 # Optional if HTTPS is required
+    termination: edge  # Edge termination for HTTPS (remove if not using HTTPS)

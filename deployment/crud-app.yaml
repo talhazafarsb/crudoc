@@ -1,0 +1,34 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: crud-app
+  labels:
+    app: crud-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: crud-app
+  template:
+    metadata:
+      labels:
+        app: crud-app
+    spec:
+      containers:
+        - name: crud-app
+          image: docker.io/talhazafarsb1/crud-app:latest
+          ports:
+            - containerPort: 9000
+      securityContext:
+        runAsNonRoot: true
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: crud-app
+spec:
+  ports:
+    - port: 9000
+      targetPort: 9000
+  selector:
+    app: crud-app

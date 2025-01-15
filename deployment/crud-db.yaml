@@ -1,0 +1,55 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: crud-db
+  labels:
+    app: crud-db
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: crud-db
+  template:
+    metadata:
+      labels:
+        app: crud-db
+    spec:
+      containers:
+        - name: crud-db
+          image: docker.io/talhazafarsb1/crud-db:latest
+          ports:
+            - containerPort: 3306
+          env:
+            - name: MYSQL_ROOT_PASSWORD
+              value: "!@bugdeaL3r"
+            - name: MYSQL_DATABASE
+              value: "db_crud"
+          volumeMounts:
+            - mountPath: /var/lib/mysql
+              name: crud-db-data
+      volumes:
+        - name: crud-db-data
+          persistentVolumeClaim:
+            claimName: crud-db-pvc
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: crud-db-pvc
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: crud-db
+spec:
+  ports:
+    - port: 3306
+      targetPort: 3306
+  selector:
+    app: crud-db
